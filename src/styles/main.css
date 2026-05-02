@@ -1,0 +1,97 @@
+/* PARAGON — Dark Fantasy Theme (Flat / Matte) */
+:root {
+  --bg:          #0a0806;
+  --bg-2:        #100d09;
+  --panel:       #0e0b08;
+  --border:      #2e2210;
+  --border-hi:   #443318;
+  --border-glow: #5a4422;
+  --fg:          #c8b890;
+  --fg-dim:      #6a5a3c;
+  --gold:        #8a6c30;
+  --gold-bright: #a07c38;
+  --crimson:     #7a1620;
+  --crimson-dim: #4e0e14;
+  --amber:       #a05a18;
+  --good:        #2e6024;
+  --sky:         #204878;
+  --shadow-gold: none;
+  --shadow-red:  none;
+  --vignette:    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+  /* aliases */
+  --neon:        var(--gold);
+  --neon-2:      var(--crimson);
+  --neon-warn:   var(--amber);
+  --neon-danger: var(--crimson);
+  --neon-good:   var(--good);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+}
+
+body {
+  background:
+    var(--vignette),
+    #0a0806;
+}
+
+/* subtle grain */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.3;
+  z-index: 999;
+}
+
+button {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  background: transparent;
+  color: var(--fg-dim);
+  border: 1px solid var(--border-hi);
+  padding: 4px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: color .12s, border-color .12s, background .12s;
+}
+button:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--fg);
+  background: rgba(90,68,34,0.15);
+}
+button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: #070504; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border: 1px solid var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+.gold   { color: var(--gold); }
+.dim    { color: var(--fg-dim); }
+.good   { color: var(--good); }
+.warn   { color: var(--amber); }
+.bad    { color: var(--crimson); }
+.sky    { color: var(--sky); }
+.neon   { color: var(--gold); }
+.mag    { color: var(--crimson); }
+
+.r-common    { color: #9a8c72; }
+.r-uncommon  { color: #4a7030; }
+.r-rare      { color: #2a5888; }
+.r-epic      { color: #6a3890; }
+.r-legendary { color: var(--gold-bright); }
+
+.divider { text-align: center; color: var(--border-hi); letter-spacing: 0.3em; font-size: 12px; user-select: none; }
