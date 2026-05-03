@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import { useGameStore } from '@/stores/game';
 import { SAVE_KEY, GAME_VERSION } from '@/data/game-config';
 import { usePartyStore } from '@/stores/party';
@@ -21,6 +21,35 @@ const showExport = ref(false);
 const showLoad = ref(false);
 const confirmReset = ref(false);
 const loadError = ref('');
+// Guards silentSave from running during a reset to prevent re-writing data on beforeunload.
+const isResetting = ref(false);
+
+// ── Save metadata & playtime ──────────────────────────────────────────────────
+// Timestamp (ms) when this save was first created; preserved across saves.
+const createdAt = ref<number>(Date.now());
+// Total accumulated active playtime from all previous sessions.
+const accumulatedMs = ref(0);
+// Start of the current active session; null means the tab is hidden (time paused).
+const sessionStart = ref<number | null>(null);
+
+// Snapshot of current total playtime — reactive to accumulatedMs / sessionStart.
+const playTimeSummary = computed(() => {
+  const ms = accumulatedMs.value + (sessionStart.value !== null ? Date.now() - sessionStart.value : 0);
+  return formatDuration(ms);
+});
+
+function formatDuration(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${totalSec}s`;
+}
+
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
 
 // ── Save migration ─────────────────────────────────────────────────────────────
 type CurrentSnapshot = ReturnType<typeof buildSnapshot>;
@@ -34,7 +63,8 @@ type CurrentSnapshot = ReturnType<typeof buildSnapshot>;
  *   1: (s) => ({ ...s, version: 2, game: { ...s.game, newField: 'default' } }),
  */
 const migrators: Record<number, (s: any) => any> = {
-  // migrations go here as the schema evolves
+  // v1 → v2: add save metadata fields
+  1: (s) => ({ ...s, version: 2, meta: { createdAt: Date.now(), playTimeMs: 0 } }),
 };
 
 /**
@@ -61,8 +91,19 @@ function migrateSnapshot(raw: any): CurrentSnapshot {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function buildSnapshot() {
+  // Flush current session time into the total before snapshotting.
+  const nowMs = sessionStart.value !== null ? Date.now() - sessionStart.value : 0;
+  const totalMs = accumulatedMs.value + nowMs;
+  // Reset session start so we don't double-count on the next save.
+  if (sessionStart.value !== null) sessionStart.value = Date.now();
+  accumulatedMs.value = totalMs;
+
   return {
     version: GAME_VERSION,
+    meta: {
+      createdAt: createdAt.value,
+      playTimeMs: totalMs,
+    },
     game: {
       view: game.view,
       resources: { ...game.resources },
@@ -90,6 +131,12 @@ function buildSnapshot() {
 }
 
 function applySnapshot(snap: ReturnType<typeof buildSnapshot>) {
+  // Restore save metadata
+  if (snap.meta) {
+    createdAt.value = snap.meta.createdAt;
+    accumulatedMs.value = snap.meta.playTimeMs;
+    // Session start stays as-is — time already elapsed this session is not lost.
+  }
   game.view = snap.game.view;
   game.resources = { ...snap.game.resources };
   party.members = snap.party.members;
@@ -124,16 +171,31 @@ function saveToCache() {
 }
 
 function silentSave() {
+  if (isResetting.value) return;
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(buildSnapshot()));
   } catch { /* silently ignore */ }
 }
 
 function handleVisibility() {
-  if (document.hidden) silentSave();
+  if (isResetting.value) return;
+  if (document.hidden) {
+    // Tab hidden — pause time tracking and save.
+    if (sessionStart.value !== null) {
+      accumulatedMs.value += Date.now() - sessionStart.value;
+      sessionStart.value = null;
+    }
+    silentSave();
+  } else {
+    // Tab visible again — resume time tracking.
+    sessionStart.value = Date.now();
+  }
 }
 
 onMounted(() => {
+  // Start tracking active session time.
+  sessionStart.value = Date.now();
+
   // Auto-load save from localStorage on startup
   try {
     const stored = localStorage.getItem(SAVE_KEY);
@@ -212,10 +274,14 @@ function resetSave() {
 }
 
 function confirmDoReset() {
+  // Set flag first so beforeunload / visibilitychange cannot re-save the old state.
+  isResetting.value = true;
   localStorage.removeItem(SAVE_KEY);
+  sessionStart.value = null;
+  accumulatedMs.value = 0;
+  createdAt.value = Date.now();
   confirmReset.value = false;
   game.optionsOpen = false;
-  // Force a full page reload so all stores reinitialise from defaults
   window.location.reload();
 }
 
@@ -235,6 +301,17 @@ function flash(msg: string, isError = false) {
         </div>
 
         <div class="section-title">Save / Load</div>
+
+        <div class="save-meta">
+          <div class="meta-row">
+            <span class="meta-key">Created</span>
+            <span class="meta-val">{{ formatDate(createdAt) }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key">Playtime</span>
+            <span class="meta-val">{{ playTimeSummary }}</span>
+          </div>
+        </div>
 
         <div class="btn-row">
           <button class="opt-btn" @click="saveToCache">
@@ -443,6 +520,35 @@ function flash(msg: string, isError = false) {
   font-size: 9px;
   color: var(--fg-dim);
   font-style: italic;
+}
+
+.save-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--border);
+  padding: 7px 10px;
+  background: var(--bg);
+  margin-bottom: 2px;
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.meta-key {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.meta-val {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 10px;
+  color: var(--fg);
+  letter-spacing: 0.05em;
 }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.15s; }

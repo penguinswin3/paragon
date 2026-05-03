@@ -7,7 +7,7 @@
 /** localStorage key used for the auto-save slot. */
 export const SAVE_KEY = 'paragon-save';
 /** Increment when the save schema changes; triggers load-validation failure. */
-export const GAME_VERSION = 1;
+export const GAME_VERSION = 2;
 
 
 
