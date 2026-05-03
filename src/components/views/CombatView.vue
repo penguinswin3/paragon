@@ -130,7 +130,7 @@ function logClass(e: CombatLogEntry) {
 .side.enemy { text-align: right; }
 .unit {
   border: 1px solid var(--border);
-  background: #100c08;
+  background: var(--bg-2);
   padding: 5px 7px;
   transition: opacity .2s;
 }
@@ -147,7 +147,7 @@ function logClass(e: CombatLogEntry) {
   overflow-y: auto;
   border: 1px solid var(--border);
   padding: 5px 10px;
-  background: #0a0704;
+  background: var(--bg);
   font-size: 12px;
   font-family: 'IM Fell English', Georgia, serif;
 }
@@ -163,7 +163,7 @@ function logClass(e: CombatLogEntry) {
   border: 1px solid var(--border-hi);
   padding: 10px;
   text-align: center;
-  background: #0e0b08;
+  background: var(--panel);
   font-family: 'Cinzel', Georgia, serif;
 }
 .banner { margin: 0 auto; line-height: 1.1; }

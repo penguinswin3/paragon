@@ -9,8 +9,6 @@ import { computed } from 'vue';
 const party = usePartyStore();
 const inv = useInventoryStore();
 
-const slots: GearSlot[] = ['weapon', 'head', 'chest', 'hands', 'legs', 'trinket'];
-
 const sel = computed(() => party.selected);
 const stats = computed(() => sel.value ? party.stats[sel.value.id] : null);
 
@@ -37,18 +35,65 @@ function unequipSlot(slot: GearSlot) {
 <template>
   <div v-if="sel" class="gear">
     <div class="header">
-      <h2 class="neon">⚒ {{ sel.name }}</h2>
+      <h2 class="neon">{{ sel.name }}</h2>
       <span class="dim">{{ sel.classId }} · Lv {{ sel.level }}</span>
     </div>
 
     <div class="grid">
       <div class="col">
         <h3>Equipment</h3>
-        <div class="slotGrid">
-          <div v-for="s in slots" :key="s" class="slotRow">
-            <span class="slotName dim">{{ s }}</span>
-            <ItemSlot :item="sel.equipment[s] ?? null" size="md"
-                      @click="sel.equipment[s] && unequipSlot(s)" />
+        <div class="bodyDoll">
+          <div class="dollSlot" style="grid-area: head">
+            <ItemSlot :item="sel.equipment['head'] ?? null" size="md" @click="sel.equipment['head'] && unequipSlot('head')" />
+            <span class="slotLabel">Head</span>
+          </div>
+          <div class="dollSlot" style="grid-area: charm">
+            <ItemSlot :item="sel.equipment['charm'] ?? null" size="md" @click="sel.equipment['charm'] && unequipSlot('charm')" />
+            <span class="slotLabel">Charm</span>
+          </div>
+          <div class="dollSlot" style="grid-area: neck">
+            <ItemSlot :item="sel.equipment['neck'] ?? null" size="md" @click="sel.equipment['neck'] && unequipSlot('neck')" />
+            <span class="slotLabel">Neck</span>
+          </div>
+          <div class="dollSlot" style="grid-area: back">
+            <ItemSlot :item="sel.equipment['back'] ?? null" size="md" @click="sel.equipment['back'] && unequipSlot('back')" />
+            <span class="slotLabel">Back</span>
+          </div>
+          <div class="dollSlot" style="grid-area: mainhand">
+            <ItemSlot :item="sel.equipment['mainhand'] ?? null" size="md" @click="sel.equipment['mainhand'] && unequipSlot('mainhand')" />
+            <span class="slotLabel">Main Hand</span>
+          </div>
+          <div class="dollSlot" style="grid-area: chest">
+            <ItemSlot :item="sel.equipment['chest'] ?? null" size="md" @click="sel.equipment['chest'] && unequipSlot('chest')" />
+            <span class="slotLabel">Chest</span>
+          </div>
+          <div class="dollSlot" style="grid-area: offhand">
+            <ItemSlot :item="sel.equipment['offhand'] ?? null" size="md" @click="sel.equipment['offhand'] && unequipSlot('offhand')" />
+            <span class="slotLabel">Off Hand</span>
+          </div>
+          <div class="dollSlot" style="grid-area: hands">
+            <ItemSlot :item="sel.equipment['hands'] ?? null" size="md" @click="sel.equipment['hands'] && unequipSlot('hands')" />
+            <span class="slotLabel">Hands</span>
+          </div>
+          <div class="dollSlot" style="grid-area: legs">
+            <ItemSlot :item="sel.equipment['legs'] ?? null" size="md" @click="sel.equipment['legs'] && unequipSlot('legs')" />
+            <span class="slotLabel">Legs</span>
+          </div>
+          <div class="dollSlot" style="grid-area: trinket">
+            <ItemSlot :item="sel.equipment['trinket'] ?? null" size="md" @click="sel.equipment['trinket'] && unequipSlot('trinket')" />
+            <span class="slotLabel">Trinket</span>
+          </div>
+          <div class="dollSlot" style="grid-area: ring1">
+            <ItemSlot :item="sel.equipment['ring1'] ?? null" size="md" @click="sel.equipment['ring1'] && unequipSlot('ring1')" />
+            <span class="slotLabel">Ring</span>
+          </div>
+          <div class="dollSlot" style="grid-area: feet">
+            <ItemSlot :item="sel.equipment['feet'] ?? null" size="md" @click="sel.equipment['feet'] && unequipSlot('feet')" />
+            <span class="slotLabel">Feet</span>
+          </div>
+          <div class="dollSlot" style="grid-area: ring2">
+            <ItemSlot :item="sel.equipment['ring2'] ?? null" size="md" @click="sel.equipment['ring2'] && unequipSlot('ring2')" />
+            <span class="slotLabel">Ring</span>
           </div>
         </div>
       </div>
@@ -100,16 +145,40 @@ h3 {
   border-bottom: 1px solid var(--border);
   padding-bottom: 4px;
 }
-.slotGrid { display: flex; flex-direction: column; gap: 4px; }
-.slotRow { display: flex; align-items: center; gap: 8px; }
-.slotName {
-  width: 58px;
-  text-transform: uppercase;
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: 9px;
-  color: var(--fg-dim);
-  letter-spacing: 0.1em;
+
+/* Body doll grid */
+.bodyDoll {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(5, auto);
+  grid-template-areas:
+    ".         head      ."
+    "charm     neck      back"
+    "mainhand  chest     offhand"
+    "hands     legs      trinket"
+    "ring1     feet      ring2";
+  gap: 6px 4px;
+  justify-content: start;
 }
+
+.dollSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.slotLabel {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 7px;
+  color: var(--fg-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1;
+}
+
 .stats { display: flex; flex-direction: column; gap: 5px; }
 .statRow { display: flex; gap: 8px; align-items: center; }
 .statRow > .dim {

@@ -217,7 +217,7 @@ const diffClass: Record<string, string> = {
   padding: 10px 12px;
   border: 1px solid var(--border-hi);
   border-left: 3px solid var(--amber);
-  background: rgba(0,0,0,0.35);
+  background: var(--bg-2);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -326,7 +326,7 @@ const diffClass: Record<string, string> = {
   font-family: 'Cinzel', Georgia, serif;
   letter-spacing: 0.06em;
   color: var(--gold-bright);
-  background: rgba(90,68,34,0.12);
+  background: var(--gold-tint-lo);
   border: 1px solid var(--border-hi);
   padding: 2px 7px;
 }
@@ -341,7 +341,7 @@ const diffClass: Record<string, string> = {
   color: var(--gold);
   padding: 5px 14px;
 }
-.claim-btn:hover { background: rgba(90,68,34,0.2); border-color: var(--gold-bright); }
+.claim-btn:hover { background: var(--gold-tint-mid); border-color: var(--gold-bright); }
 
 /* ── Party roster ── */
 .roster { list-style: none; padding: 0; margin: 0; }

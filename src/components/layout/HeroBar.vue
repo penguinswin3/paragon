@@ -23,12 +23,12 @@ const slots = computed(() => party.members.filter(m => m.classId === 'warrior'))
   display: flex; gap: 5px;
   padding: 6px;
   border-bottom: 1px solid var(--border);
-  background: #0a0806;
+  background: var(--bg);
 }
 .hero {
   width: 46px; height: 46px;
   border: 1px solid var(--border-hi);
-  background: #0e0b08;
+  background: var(--bg-2);
   font-size: 24px; line-height: 1;
   color: var(--fg-dim);
   font-family: serif;
@@ -37,7 +37,7 @@ const slots = computed(() => party.members.filter(m => m.classId === 'warrior'))
 .hero.active {
   border-color: var(--gold);
   color: var(--gold);
-  background: #140f08;
+  background: var(--bg-2);
 }
 .hero.empty { color: var(--border-hi); border-style: dashed; }
 .arrow { display:flex; align-items:center; color: var(--fg-dim); font-size: 20px; padding: 0 6px; }

@@ -11,11 +11,11 @@ export const RARITY_COLOR: Record<string, string> = {
 export const ITEM_DB: Record<string, Item> = {
   rusty_blade: {
     id: 'rusty_blade', name: 'Rusty Blade', glyph: '/', rarity: 'common',
-    type: 'gear', slot: 'weapon', itemLevel: 1, stats: { atk: 3 }
+    type: 'gear', slot: 'mainhand', itemLevel: 1, stats: { atk: 3 }
   } as GearItem,
   oak_staff: {
     id: 'oak_staff', name: 'Oak Staff', glyph: '|', rarity: 'common',
-    type: 'gear', slot: 'weapon', itemLevel: 1, stats: { atk: 2, crit: 0.05 }
+    type: 'gear', slot: 'mainhand', itemLevel: 1, stats: { atk: 2, crit: 0.05 }
   } as GearItem,
   leather_cap: {
     id: 'leather_cap', name: 'Leather Cap', glyph: '^', rarity: 'common',
@@ -27,7 +27,7 @@ export const ITEM_DB: Record<string, Item> = {
   } as GearItem,
   shadow_dagger: {
     id: 'shadow_dagger', name: 'Shadow Dagger', glyph: '†', rarity: 'rare',
-    type: 'gear', slot: 'weapon', itemLevel: 3, stats: { atk: 5, spd: 3, crit: 0.1 }
+    type: 'gear', slot: 'mainhand', itemLevel: 3, stats: { atk: 5, spd: 3, crit: 0.1 }
   } as GearItem,
   ember_amulet: {
     id: 'ember_amulet', name: 'Ember Amulet', glyph: '◊', rarity: 'epic',

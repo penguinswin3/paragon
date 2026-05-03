@@ -23,7 +23,7 @@ const game = useGameStore();
   position: relative;
   padding: 12px;
   overflow: auto;
-  background: #0c0906;
+  background: var(--bg);
 }
 .placeholder {
   display: grid; place-items: center;

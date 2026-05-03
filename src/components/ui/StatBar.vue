@@ -23,7 +23,7 @@ const props = defineProps<{
 .bar {
   position: relative;
   width: 100%;
-  background: #0a0804;
+  background: var(--bg);
   border: 1px solid var(--border);
   overflow: hidden;
 }

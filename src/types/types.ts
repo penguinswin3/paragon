@@ -2,7 +2,7 @@
 
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
-export type GearSlot = 'weapon' | 'head' | 'chest' | 'hands' | 'legs' | 'trinket';
+export type GearSlot = 'head' | 'back' | 'neck' | 'charm' | 'mainhand' | 'chest' | 'offhand' | 'hands' | 'legs' | 'feet' | 'trinket' | 'ring1' | 'ring2';
 
 export type ItemType = 'gear' | 'consumable' | 'material';
 

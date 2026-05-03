@@ -25,7 +25,7 @@ const r = computed(() => game.resources);
   display: flex; align-items: center; gap: 16px;
   padding: 5px 16px;
   border: 1px solid var(--border-hi);
-  background: #0c0906;
+  background: var(--bg);
 }
 .logo {
   font-family: 'Cinzel Decorative', 'Cinzel', Georgia, serif;

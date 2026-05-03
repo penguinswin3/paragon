@@ -45,7 +45,7 @@ const tree = [
 .node {
   display: flex; align-items: center; gap: 8px;
   border: 1px solid var(--border); padding: 7px 8px;
-  background: rgba(0,0,0,0.3);
+  background: var(--bg-2);
 }
 .node[data-tier='2'] { border-color: var(--crimson-dim); }
 .node[data-tier='3'] { border-color: var(--border-glow); }

@@ -77,7 +77,7 @@ const showCombat = computed(() => dungeon.run !== null);
 .dungeon { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; }
 .art {
   border: 1px solid var(--border-hi);
-  background: #0a0704;
+  background: var(--bg);
   padding: 6px;
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
@@ -91,7 +91,7 @@ const showCombat = computed(() => dungeon.run !== null);
 }
 .select { display: flex; flex-direction: column; gap: 2px; }
 .select button { font-size: 10px; text-align: left; padding: 3px 8px; }
-.select button.active { color: var(--gold); border-color: var(--gold); background: rgba(90,68,34,0.12); }
+.select button.active { color: var(--gold); border-color: var(--gold); background: var(--gold-tint-lo); }
 .select button.locked { opacity: 0.5; }
 
 .stages {
@@ -110,7 +110,7 @@ const showCombat = computed(() => dungeon.run !== null);
   align-items: center;
   gap: 6px;
 }
-.stages button.active { color: var(--amber); border-color: var(--amber); background: rgba(90,68,20,0.1); }
+.stages button.active { color: var(--amber); border-color: var(--amber); background: var(--gold-tint-lo); }
 .stages button.locked { opacity: 0.45; }
 .stage-diff { font-size: 9px; color: var(--warn); letter-spacing: -1px; flex-shrink: 0; }
 
@@ -118,7 +118,7 @@ const showCombat = computed(() => dungeon.run !== null);
   flex: 1;
   border: 1px solid var(--border);
   padding: 8px;
-  background: #0c0906;
+  background: var(--bg);
   font-size: 12px;
   overflow: auto;
 }
@@ -137,5 +137,5 @@ const showCombat = computed(() => dungeon.run !== null);
   padding: 7px 8px;
   text-transform: uppercase;
 }
-.start:hover:not(:disabled) { background: rgba(90,68,34,0.15); }
+.start:hover:not(:disabled) { background: var(--gold-tint-mid); }
 </style>

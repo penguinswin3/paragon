@@ -1,29 +1,34 @@
 /* PARAGON — Dark Fantasy Theme (Flat / Matte) */
+/* Palette: #E4DFD2 (parchment) · #A69874 (tan) · #C79E3C (gold) · #312D2B (near-black) */
 :root {
-  --bg:          #3a2d21;
-  --bg-2:        #100d09;
-  --panel:       #0e0b08;
-  --border:      #2e2210;
-  --border-hi:   #443318;
-  --border-glow: #5a4422;
-  --fg:          #c8b890;
-  --fg-dim:      #6a5a3c;
-  --gold:        #8a6c30;
-  --gold-bright: #a07c38;
-  --crimson:     #7a1620;
-  --crimson-dim: #4e0e14;
-  --amber:       #a05a18;
-  --good:        #2e6024;
-  --sky:         #204878;
+  --bg:          #1C1917;
+  --bg-2:        #252120;
+  --panel:       #2C2724;
+  --border:      #473E33;
+  --border-hi:   #5C5042;
+  --border-glow: #6B5A38;
+  --fg:          #E4DFD2;
+  --fg-dim:      #A69874;
+  --gold:        #C79E3C;
+  --gold-bright: #D9AE4A;
+  --crimson:     #8B2222;
+  --crimson-dim: #5A1616;
+  --amber:       #B87830;
+  --good:        #3D6B2C;
+  --sky:         #2A4E72;
   --shadow-gold: none;
   --shadow-red:  none;
-  --vignette:    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+  --vignette:    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
   /* aliases */
   --neon:        var(--gold);
   --neon-2:      var(--crimson);
   --neon-warn:   var(--amber);
   --neon-danger: var(--crimson);
   --neon-good:   var(--good);
+  /* gold tint overlays — use for active/hover states */
+  --gold-tint-lo:  rgba(199,158,60,0.10);
+  --gold-tint-mid: rgba(199,158,60,0.15);
+  --gold-tint-hi:  rgba(199,158,60,0.22);
 }
 
 * { box-sizing: border-box; }
@@ -41,7 +46,7 @@ html, body, #app {
 body {
   background:
     var(--vignette),
-    #0a0806;
+    #181411;
 }
 
 /* subtle grain */
@@ -70,12 +75,12 @@ button {
 button:hover:not(:disabled) {
   border-color: var(--gold);
   color: var(--fg);
-  background: rgba(90,68,34,0.15);
+  background: var(--gold-tint-lo);
 }
 button:disabled { opacity: 0.35; cursor: not-allowed; }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: #070504; }
+::-webkit-scrollbar-track { background: #141210; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border: 1px solid var(--border); }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
@@ -88,10 +93,29 @@ button:disabled { opacity: 0.35; cursor: not-allowed; }
 .neon   { color: var(--gold); }
 .mag    { color: var(--crimson); }
 
-.r-common    { color: #9a8c72; }
-.r-uncommon  { color: #4a7030; }
-.r-rare      { color: #2a5888; }
-.r-epic      { color: #6a3890; }
+.r-common    { color: #A69874; }
+.r-uncommon  { color: #5A8040; }
+.r-rare      { color: #3A6898; }
+.r-epic      { color: #7848A8; }
 .r-legendary { color: var(--gold-bright); }
 
 .divider { text-align: center; color: var(--border-hi); letter-spacing: 0.3em; font-size: 12px; user-select: none; }
+
+/* ── Shared section heading — use on h3 or a div acting as a section label ── */
+.ui-section-title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin: 0 0 8px;
+}
+
+/* ── Active/selected button state used consistently across nav, tabs, lists ── */
+.btn-active {
+  color: var(--gold) !important;
+  border-color: var(--gold) !important;
+  background: var(--gold-tint-lo) !important;
+}

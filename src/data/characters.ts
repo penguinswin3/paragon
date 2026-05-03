@@ -10,6 +10,6 @@ export const STARTER_PARTY: Character[] = [
     id: 'c-warrior', name: 'Jullian', classId: 'fighter', glyph: 'ᛟ',
     level: 1, xp: 0, xpToNext: XP_BASE,
     baseStats: baseStats({ hp: 70, atk: 7, def: 5, spd: 4 }),
-    equipment: { weapon: ITEM_DB.rusty_blade as GearItem },
+    equipment: { mainhand: ITEM_DB.rusty_blade as GearItem },
   }
 ];

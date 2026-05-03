@@ -198,3 +198,4 @@ All reward types accept `hidden?: boolean` — the UI shows "???" until turn-in.
 ## Visual Style
 Never use emojis for anything ever. 
 This will be a dark fantasy style with brownish gold colors as the base. Try to keep a clean and simple style. Use ascii or unicode characters for borders and such selectively for styling. 
+Most styling will use a 4 color system, with a whiteish tone, a blackish tone, and two middle color tones, one dark the other lighter. Pretty much all ui components will use this style. 

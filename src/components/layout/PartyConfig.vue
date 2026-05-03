@@ -45,13 +45,13 @@ const slots = computed(() => party.members.filter(m => m.classId === 'warrior'))
 }
 .card {
   border: 1px solid var(--border-hi);
-  background: #100c08;
+  background: var(--bg-2);
   padding: 8px 10px;
   display: flex; flex-direction: column; gap: 5px;
   cursor: pointer;
   transition: border-color .12s;
 }
-.card.active { border-color: var(--gold); background: #150f09; }
+.card.active { border-color: var(--gold); background: var(--panel); }
 .card.empty { border-style: dashed; border-color: var(--border); display: grid; place-items: center; cursor: default; }
 .card:hover:not(.empty):not(.active) { border-color: var(--border-glow); }
 .head { display: flex; align-items: center; gap: 7px; }

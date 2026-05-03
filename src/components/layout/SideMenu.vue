@@ -39,7 +39,7 @@ function pick(id: GameView) {
   padding: 6px;
   border-right: 1px solid var(--border);
   width: 66px;
-  background: #090705;
+  background: var(--bg);
 }
 .item {
   display: flex; flex-direction: column; align-items: center;
@@ -60,7 +60,7 @@ function pick(id: GameView) {
 .item.active {
   border-color: var(--gold);
   color: var(--gold);
-  background: rgba(90,68,34,0.12);
+  background: var(--gold-tint-lo);
 }
 .item.active .glyph { color: var(--gold); }
 

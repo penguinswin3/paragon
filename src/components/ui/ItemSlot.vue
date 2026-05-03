@@ -46,7 +46,7 @@ watch(() => props.item?.id, () => { spriteError.value = false; });
   align-items: center;
   justify-content: center;
   position: relative;
-  background: #0c0906;
+  background: var(--bg-2);
   border: 1px solid var(--border-hi);
   color: var(--fg);
   padding: 0;
@@ -59,7 +59,7 @@ watch(() => props.item?.id, () => { spriteError.value = false; });
 
 .slot:hover    { border-color: var(--gold); }
 .slot.selected { border-color: var(--gold); }
-.slot.filled   { background: #120e08; }
+.slot.filled   { background: var(--panel); }
 
 /* Item sprite — fills the slot, pixel-crisp */
 .slot__sprite {

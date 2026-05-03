@@ -310,7 +310,7 @@ function flash(msg: string, isError = false) {
 }
 
 .panel {
-  background: #0e0b07;
+  background: var(--panel);
   border: 1px solid var(--border-hi);
   width: 360px;
   padding: 14px 16px 16px;
@@ -375,7 +375,7 @@ function flash(msg: string, isError = false) {
 .opt-btn:disabled { opacity: 0.4; cursor: default; }
 .opt-btn.small { font-size: 9px; padding: 5px 10px; align-self: flex-start; }
 .opt-btn.accent { border-color: var(--gold); color: var(--gold); }
-.opt-btn.accent:hover:not(:disabled) { background: rgba(90,68,34,0.18); }
+.opt-btn.accent:hover:not(:disabled) { background: var(--gold-tint-mid); }
 
 .btn-glyph { font-size: 14px; font-family: serif; }
 
@@ -397,7 +397,7 @@ function flash(msg: string, isError = false) {
   resize: vertical;
   font-family: 'Courier New', monospace;
   font-size: 10px;
-  background: #070503;
+  background: var(--bg);
   color: var(--fg);
   border: 1px solid var(--border);
   padding: 6px;

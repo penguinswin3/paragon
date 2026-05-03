@@ -19,7 +19,7 @@ defineProps<{ title?: string; accent?: 'cyan' | 'magenta' | 'amber' }>();
 .panel {
   position: relative;
   border: 1px solid var(--border-hi);
-  background: #0e0b08;
+  background: var(--panel);
   display: flex;
   flex-direction: column;
   min-height: 0;
