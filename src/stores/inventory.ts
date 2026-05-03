@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import type { Item } from '@/types';
-import { ITEM_DB } from '@/data/content';
+import type { Item } from '@/types/types';
+import { ITEM_DB } from '@/data/items';
 
 interface InvEntry { item: Item; qty: number; key: string; }
 
@@ -13,7 +13,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     { key: 'k-dust', item: ITEM_DB.bone_dust, qty: 12 }
   ]);
 
-  const totalCount = computed(() => entries.value.reduce((s, e) => s + e.qty, 0));
+  const totalCount = computed(() => entries.value.length);
 
   function add(item: Item, qty = 1) {
     if (item.type === 'gear') {

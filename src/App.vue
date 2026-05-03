@@ -7,11 +7,13 @@ import PartyConfig from '@/components/layout/PartyConfig.vue';
 import DungeonPanel from '@/components/layout/DungeonPanel.vue';
 import Inventory from '@/components/layout/Inventory.vue';
 import NeonPanel from '@/components/ui/NeonPanel.vue';
+import OptionsMenu from '@/components/layout/OptionsMenu.vue';
 </script>
 
 <template>
   <div class="app">
     <TopBar />
+    <OptionsMenu />
 
     <main class="grid">
       <!-- Left: game screen with side menu + hero bar -->

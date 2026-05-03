@@ -1,4 +1,7 @@
-import type { Character, CharacterStats, GearItem } from '@/types';
+import type { Character, CharacterStats, GearItem } from '@/types/types';
+import {
+  LEVEL_HP_PER_LEVEL, LEVEL_ATK_PER_LEVEL, LEVEL_DEF_PER_LEVEL
+} from '@/data/game-config';
 
 export function rollDice(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,9 +26,9 @@ export function computeCharacterStats(c: Character): CharacterStats {
   }
   // small per-level scaling
   const lvlBonus = c.level - 1;
-  total.hp += lvlBonus * 8;
-  total.atk += lvlBonus * 1;
-  total.def += Math.floor(lvlBonus * 0.5);
+  total.hp  += lvlBonus * LEVEL_HP_PER_LEVEL;
+  total.atk += lvlBonus * LEVEL_ATK_PER_LEVEL;
+  total.def += Math.floor(lvlBonus * LEVEL_DEF_PER_LEVEL);
   return total;
 }
 

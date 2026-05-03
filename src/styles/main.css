@@ -1,6 +1,6 @@
 /* PARAGON — Dark Fantasy Theme (Flat / Matte) */
 :root {
-  --bg:          #0a0806;
+  --bg:          #3a2d21;
   --bg-2:        #100d09;
   --panel:       #0e0b08;
   --border:      #2e2210;
@@ -33,7 +33,7 @@ html, body, #app {
   background: var(--bg);
   color: var(--fg);
   font-family: 'IM Fell English', Georgia, 'Times New Roman', serif;
-  font-size: 14px;
+  font-size: 18px;
   letter-spacing: 0.01em;
   overflow: hidden;
 }
@@ -57,7 +57,7 @@ body::before {
 
 button {
   font-family: 'Cinzel', Georgia, serif;
-  font-size: 11px;
+  font-size: 12px;
   background: transparent;
   color: var(--fg-dim);
   border: 1px solid var(--border-hi);

@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import {
+  STARTING_GOLD, STARTING_SILVER, STARTING_COPPER
+} from '@/data/game-config';
 
 export type GameView = 'quest' | 'gear' | 'talents' | 'dungeon';
 
+
 export const useGameStore = defineStore('game', () => {
   const view = ref<GameView>('quest');
-  const resources = ref({ gold: 87, silver: 37, copper: 14 });
+  const resources = ref({ gold: STARTING_GOLD, silver: STARTING_SILVER, copper: STARTING_COPPER });
   const optionsOpen = ref(false);
 
   function setView(v: GameView) { view.value = v; }

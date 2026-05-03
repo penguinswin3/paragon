@@ -2,7 +2,7 @@
 import { useDungeonStore } from '@/stores/dungeon';
 import StatBar from '@/components/ui/StatBar.vue';
 import { computed, nextTick, ref, watch } from 'vue';
-import type { CombatLogEntry } from '@/types';
+import type { CombatLogEntry } from '@/types/types';
 
 const dungeon = useDungeonStore();
 
@@ -32,8 +32,8 @@ function logClass(e: CombatLogEntry) {
 <template>
   <div v-if="run" class="combat">
     <div class="hud">
-      <span class="neon">⚔ {{ dungeon.selected?.name }}</span>
-      <span class="dim"> · encounter {{ run.encounterIndex + 1 }} / {{ dungeon.selected?.encounters.length }}</span>
+      <span class="neon">⚔ {{ dungeon.selectedDungeon?.name }}</span>
+      <span class="dim"> · encounter {{ run.encounterIndex + 1 }} / {{ dungeon.selectedStage?.encounters.length }}</span>
       <span class="status" :class="run.status">[{{ run.status }}]</span>
 
       <div class="speed">
@@ -43,8 +43,8 @@ function logClass(e: CombatLogEntry) {
           {{ s }}×
         </button>
       </div>
-      <button v-if="run.status === 'running'" class="abort" @click="dungeon.abortDungeon">abort</button>
-      <button v-else-if="run.status !== 'idle'" class="abort" @click="dungeon.dismissResult">close</button>
+      <button v-if="run.status === 'running'" class="abort" @click="dungeon.abortDungeon()">abort</button>
+      <button v-else class="abort" @click="dungeon.dismissResult()">close</button>
     </div>
 
     <div class="arena">

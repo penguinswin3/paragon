@@ -1,15 +1,27 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type {
-  CombatLogEntry, CombatUnit, Dungeon, DungeonRun, EnemyTemplate, Item, LootEntry
-} from '@/types';
-import { DUNGEON_DB, ITEM_DB } from '@/data/content';
+  CombatLogEntry, CombatUnit, Dungeon, DungeonRun, DungeonStage, Encounter,
+  EnemyTemplate, Item, LootEntry
+} from '@/types/types';
+import { DUNGEON_DB } from '@/data/dungeons';
+import { ITEM_DB } from '@/data/items';
+import { useQuestStore } from './quests';
 import { clamp, rollDice, uid, weightedPick } from '@/utils/game';
 import { usePartyStore } from './party';
 import { useInventoryStore } from './inventory';
 import { useGameStore } from './game';
+import {
+  COMBAT_TICK_MS,
+  PARTY_INITIAL_COOLDOWN, PARTY_INITIAL_COOLDOWN_JITTER,
+  ENEMY_INITIAL_COOLDOWN, ENEMY_INITIAL_COOLDOWN_JITTER,
+  COOLDOWN_BASE, COOLDOWN_SPD_FACTOR, COOLDOWN_MIN, COOLDOWN_MAX, COOLDOWN_JITTER,
+  DEF_REDUCTION_FACTOR, DAMAGE_ROLL_SPREAD, CRIT_DAMAGE_MULTIPLIER,
+  LOOT_DROP_CHANCE, COMBAT_LOG_MAX,
+  SPEED_MIN, SPEED_MAX,
+} from '@/data/game-config';
 
-const TICK_MS = 250;
+const TICK_MS = COMBAT_TICK_MS;
 
 export const useDungeonStore = defineStore('dungeon', () => {
   const partyStore = usePartyStore();
@@ -17,30 +29,75 @@ export const useDungeonStore = defineStore('dungeon', () => {
   const gameStore = useGameStore();
 
   const dungeons = ref<Dungeon[]>(Object.values(DUNGEON_DB));
-  const selectedId = ref<string>(dungeons.value[0]?.id ?? '');
+  const selectedDungeonId = ref<string>(dungeons.value[0]?.id ?? '');
+  const selectedStageId = ref<string>(dungeons.value[0]?.stages[0]?.id ?? '');
+  /** dungeonId → array of completed stageIds */
+  const completedStages = ref<Record<string, string[]>>({});
+  /**
+   * Dungeons available to the player. Starts with first two; others are
+   * unlocked by the quest system via unlockDungeon().
+   */
+  const unlockedDungeonIds = ref<string[]>(
+    dungeons.value.slice(0, 2).map(d => d.id)
+  );
   const run = ref<DungeonRun | null>(null);
   const speed = ref(1);
 
   let timer: number | null = null;
 
-  const selected = computed(() =>
-    dungeons.value.find(d => d.id === selectedId.value) ?? null
+  const selectedDungeon = computed<Dungeon | null>(() =>
+    dungeons.value.find(d => d.id === selectedDungeonId.value) ?? null
+  );
+
+  const selectedStage = computed<DungeonStage | null>(() =>
+    selectedDungeon.value?.stages.find(s => s.id === selectedStageId.value) ?? null
   );
 
   const isRunning = computed(() => run.value?.status === 'running');
 
-  function select(id: string) {
-    if (isRunning.value) return;
-    selectedId.value = id;
+  function isStageUnlocked(dungeonId: string, stageId: string): boolean {
+    const dungeon = dungeons.value.find(d => d.id === dungeonId);
+    if (!dungeon) return false;
+    const idx = dungeon.stages.findIndex(s => s.id === stageId);
+    if (idx === 0) return true;
+    if (idx < 0) return false;
+    const prevId = dungeon.stages[idx - 1].id;
+    return (completedStages.value[dungeonId] ?? []).includes(prevId);
   }
 
-  function setSpeed(s: number) { speed.value = clamp(s, 0.5, 4); }
+  function selectDungeon(id: string) {
+    if (isRunning.value) return;
+    selectedDungeonId.value = id;
+    const d = dungeons.value.find(d => d.id === id);
+    if (!d || d.stages.length === 0) return;
+    // Auto-advance to the furthest unlocked stage
+    let lastUnlocked = d.stages[0].id;
+    for (const stage of d.stages) {
+      if (isStageUnlocked(id, stage.id)) lastUnlocked = stage.id;
+      else break;
+    }
+    selectedStageId.value = lastUnlocked;
+  }
+
+  function selectStage(id: string) {
+    if (isRunning.value) return;
+    selectedStageId.value = id;
+  }
+
+  /** Called by the quest system when a quest reward unlocks a dungeon. */
+  function unlockDungeon(id: string) {
+    if (!unlockedDungeonIds.value.includes(id)) {
+      unlockedDungeonIds.value = [...unlockedDungeonIds.value, id];
+    }
+  }
+
+  function setSpeed(s: number) { speed.value = clamp(s, SPEED_MIN, SPEED_MAX); }
 
   function pushLog(kind: CombatLogEntry['kind'], text: string) {
     if (!run.value) return;
     const e: CombatLogEntry = { t: Date.now(), text, kind };
     run.value.log.push(e);
-    if (run.value.log.length > 200) run.value.log.splice(0, run.value.log.length - 200);
+    if (run.value.log.length > COMBAT_LOG_MAX) run.value.log.splice(0, run.value.log.length - COMBAT_LOG_MAX);
   }
 
   function buildPartyUnits(): CombatUnit[] {
@@ -53,7 +110,7 @@ export const useDungeonStore = defineStore('dungeon', () => {
         side: 'party',
         hp: s.hp, maxHp: s.hp,
         atk: s.atk, def: s.def, spd: s.spd, crit: s.crit,
-        cooldown: 1000 + rollDice(0, 400),
+        cooldown: PARTY_INITIAL_COOLDOWN + rollDice(0, PARTY_INITIAL_COOLDOWN_JITTER),
         alive: true,
         sourceId: c.id
       };
@@ -68,36 +125,56 @@ export const useDungeonStore = defineStore('dungeon', () => {
       side: 'enemy',
       hp: t.stats.hp, maxHp: t.stats.hp,
       atk: t.stats.atk, def: t.stats.def, spd: t.stats.spd, crit: t.stats.crit,
-      cooldown: 1500 + rollDice(0, 600),
+      cooldown: ENEMY_INITIAL_COOLDOWN + rollDice(0, ENEMY_INITIAL_COOLDOWN_JITTER),
       alive: true,
       sourceId: t.id
     }));
   }
 
+  /**
+   * Route an encounter to the appropriate handler.
+   * Combat encounters start the tick engine; all other categories are logged
+   * and auto-resolved so the run advances immediately.
+   */
+  function resolveEncounter(enc: Encounter) {
+    if (!run.value) return;
+    if (enc.intro) pushLog('info', enc.intro);
+    if (enc.category === 'combat') {
+      const enemies = buildEnemyUnits(enc.enemies);
+      run.value.units = run.value.units.filter(u => u.side === 'party').concat(enemies);
+      startTimer();
+    } else {
+      if (enc.category === 'social')
+        pushLog('info', `[Social]      ${enc.npcName}: "${enc.prompt}"`);
+      else if (enc.category === 'exploration')
+        pushLog('info', `[Exploration] ${enc.description}`);
+      else if (enc.category === 'special')
+        pushLog('info', `[Special]     ${enc.description}`);
+      if (enc.outro) pushLog('info', enc.outro);
+      advanceEncounter();
+    }
+  }
+
   function startDungeon() {
-    if (!selected.value || isRunning.value) return;
-    const d = selected.value;
-    const partyUnits = buildPartyUnits();
-    const enemies = buildEnemyUnits(d.encounters[0].enemies);
+    if (!selectedDungeon.value || !selectedStage.value || isRunning.value) return;
+    const dungeon = selectedDungeon.value;
+    const stage = selectedStage.value;
     run.value = {
-      dungeonId: d.id,
+      dungeonId: dungeon.id,
+      stageId: stage.id,
       status: 'running',
       encounterIndex: 0,
-      units: [...partyUnits, ...enemies],
+      units: [...buildPartyUnits()],
       log: [],
       rewards: { xp: 0, loot: [] }
     };
-    pushLog('system', `▶ Entering ${d.name}`);
-    if (d.encounters[0].intro) pushLog('info', d.encounters[0].intro);
-    startTimer();
+    pushLog('system', `▶ Entering ${dungeon.name} — ${stage.name}`);
+    resolveEncounter(stage.encounters[0]);
   }
 
   function abortDungeon() {
     stopTimer();
-    if (run.value) {
-      run.value.status = 'idle';
-      pushLog('system', '✖ Run aborted');
-    }
+    run.value = null;
   }
 
   function startTimer() {
@@ -125,7 +202,7 @@ export const useDungeonStore = defineStore('dungeon', () => {
       if (u.cooldown <= 0) {
         performAttack(u);
         // attack speed: lower spd means longer cooldown
-        u.cooldown = clamp(2500 - u.spd * 120, 600, 4000) + rollDice(0, 200);
+        u.cooldown = clamp(COOLDOWN_BASE - u.spd * COOLDOWN_SPD_FACTOR, COOLDOWN_MIN, COOLDOWN_MAX) + rollDice(0, COOLDOWN_JITTER);
       }
     }
 
@@ -141,9 +218,9 @@ export const useDungeonStore = defineStore('dungeon', () => {
     if (targets.length === 0) return;
     const tgt = targets[rollDice(0, targets.length - 1)];
     const isCrit = Math.random() < attacker.crit;
-    let dmg = Math.max(1, attacker.atk - Math.floor(tgt.def * 0.6));
-    dmg = rollDice(Math.max(1, dmg - 1), dmg + 1);
-    if (isCrit) dmg = Math.floor(dmg * 1.75);
+    let dmg = Math.max(1, attacker.atk - Math.floor(tgt.def * DEF_REDUCTION_FACTOR));
+    dmg = rollDice(Math.max(1, dmg - DAMAGE_ROLL_SPREAD), dmg + DAMAGE_ROLL_SPREAD);
+    if (isCrit) dmg = Math.floor(dmg * CRIT_DAMAGE_MULTIPLIER);
     tgt.hp -= dmg;
     pushLog(
       isCrit ? 'crit' : 'damage',
@@ -160,23 +237,27 @@ export const useDungeonStore = defineStore('dungeon', () => {
           run.value!.rewards.xp += tmpl.xpReward;
           rollLoot(tmpl.lootTable);
         }
+        // Quest kill tracking
+        useQuestStore().recordKill(tgt.sourceId, run.value!.dungeonId);
       }
     }
   }
 
   function findEnemyTemplate(id: string): EnemyTemplate | undefined {
     for (const d of dungeons.value)
-      for (const e of d.encounters)
-        for (const t of e.enemies)
-          if (t.id === id) return t;
+      for (const stage of d.stages)
+        for (const e of stage.encounters)
+          if (e.category === 'combat')
+            for (const t of e.enemies)
+              if (t.id === id) return t;
     return undefined;
   }
 
   function rollLoot(table: LootEntry[]) {
     if (!run.value) return;
     if (table.length === 0) return;
-    // 70% chance any drop at all
-    if (Math.random() > 0.7) return;
+    // chance any drop at all
+    if (Math.random() > LOOT_DROP_CHANCE) return;
     const pick = weightedPick(table);
     if (!pick) return;
     const baseItem = ITEM_DB[pick.itemId];
@@ -189,18 +270,20 @@ export const useDungeonStore = defineStore('dungeon', () => {
   }
 
   function advanceEncounter() {
-    if (!run.value || !selected.value) return;
+    if (!run.value) return;
+    // Resolve the active stage from the run (not the selection, which may have changed)
+    const dungeon = dungeons.value.find(d => d.id === run.value!.dungeonId);
+    const stage = dungeon?.stages.find(s => s.id === run.value!.stageId);
+    if (!stage) return;
     const next = run.value.encounterIndex + 1;
-    if (next >= selected.value.encounters.length) {
+    if (next >= stage.encounters.length) {
       return endRun(true);
     }
     run.value.encounterIndex = next;
-    const enemies = buildEnemyUnits(selected.value.encounters[next].enemies);
-    // remove dead enemies, keep party
-    run.value.units = run.value.units.filter(u => u.side === 'party').concat(enemies);
-    pushLog('system', `── Encounter ${next + 1} / ${selected.value.encounters.length} ──`);
-    const intro = selected.value.encounters[next].intro;
-    if (intro) pushLog('info', intro);
+    // Strip dead enemies; party units persist across encounters
+    run.value.units = run.value.units.filter(u => u.side === 'party');
+    pushLog('system', `── Encounter ${next + 1} / ${stage.encounters.length} ──`);
+    resolveEncounter(stage.encounters[next]);
   }
 
   function endRun(victory: boolean) {
@@ -208,6 +291,12 @@ export const useDungeonStore = defineStore('dungeon', () => {
     stopTimer();
     run.value.status = victory ? 'victory' : 'defeat';
     if (victory) {
+      const { dungeonId, stageId } = run.value;
+      // Record stage completion
+      const prev = completedStages.value[dungeonId] ?? [];
+      if (!prev.includes(stageId)) {
+        completedStages.value = { ...completedStages.value, [dungeonId]: [...prev, stageId] };
+      }
       pushLog('system', '★ VICTORY ★');
       const xpPer = Math.ceil(run.value.rewards.xp / Math.max(1, partyStore.members.length));
       partyStore.awardXp(xpPer);
@@ -215,8 +304,13 @@ export const useDungeonStore = defineStore('dungeon', () => {
         const qty = (it as any).stack ?? 1;
         invStore.add(it, qty);
       }
-      gameStore.addGold(rollDice(20, 80) * (selected.value?.difficulty ?? 1));
+      const stageDiff = dungeons.value
+        .find(d => d.id === dungeonId)
+        ?.stages.find(s => s.id === stageId)?.difficulty ?? 1;
+      gameStore.addGold(rollDice(20, 80) * stageDiff);
       pushLog('info', `Each hero gained ${xpPer} XP.`);
+      // Quest progress: dungeon clear + check for newly unlocked quests
+      useQuestStore().recordDungeonClear(dungeonId);
     } else {
       pushLog('system', '☠ DEFEAT — the party retreats.');
     }
@@ -227,8 +321,14 @@ export const useDungeonStore = defineStore('dungeon', () => {
   }
 
   return {
-    dungeons, selectedId, selected, run, speed, isRunning,
-    select, setSpeed, startDungeon, abortDungeon, dismissResult
+    dungeons,
+    selectedDungeonId, selectedStageId,
+    selectedDungeon, selectedStage,
+    completedStages, unlockedDungeonIds,
+    run, speed, isRunning,
+    selectDungeon, selectStage, setSpeed,
+    startDungeon, abortDungeon, dismissResult,
+    isStageUnlocked, unlockDungeon,
   };
 });
 

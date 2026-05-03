@@ -2,7 +2,7 @@
 import { useInventoryStore } from '@/stores/inventory';
 import ItemSlot from '@/components/ui/ItemSlot.vue';
 import { computed, ref } from 'vue';
-import type { Item, ItemType } from '@/types';
+import type { Item, ItemType } from '@/types/types';
 
 const inv = useInventoryStore();
 const filter = ref<'all' | ItemType>('all');
@@ -36,7 +36,6 @@ const hovered = ref<Item | null>(null);
                 :item="e.item" :qty="e.qty" size="md"
                 @click="hovered = e.item"
                 @mouseenter="hovered = e.item" />
-      <div v-for="n in Math.max(0, 30 - filtered.length)" :key="'pad-'+n" class="pad">·</div>
     </div>
 
     <div class="tip" v-if="hovered">
@@ -81,15 +80,6 @@ const hovered = ref<Item | null>(null);
   overflow-y: auto;
   align-content: start;
 }
-.pad {
-  width: 40px; height: 40px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.2);
-  display: grid; place-items: center;
-  color: var(--border);
-  font-size: 10px;
-}
-
 .tip {
   border-top: 1px solid var(--border);
   padding-top: 5px;

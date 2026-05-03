@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import type { Character, GearItem, GearSlot } from '@/types';
-import { STARTER_PARTY } from '@/data/content';
+import type { Character, GearItem, GearSlot } from '@/types/types';
+import { STARTER_PARTY } from '@/data/characters';
 import { computeCharacterStats } from '@/utils/game';
+import { XP_CURVE_MULTIPLIER } from '@/data/game-config';
 
 export const usePartyStore = defineStore('party', () => {
   const members = ref<Character[]>(JSON.parse(JSON.stringify(STARTER_PARTY)));
@@ -45,7 +46,7 @@ export const usePartyStore = defineStore('party', () => {
       while (c.xp >= c.xpToNext) {
         c.xp -= c.xpToNext;
         c.level += 1;
-        c.xpToNext = Math.floor(c.xpToNext * 1.4);
+        c.xpToNext = Math.floor(c.xpToNext * XP_CURVE_MULTIPLIER);
       }
     }
   }

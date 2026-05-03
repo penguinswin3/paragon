@@ -3,7 +3,7 @@ import { usePartyStore } from '@/stores/party';
 import { useInventoryStore } from '@/stores/inventory';
 import ItemSlot from '@/components/ui/ItemSlot.vue';
 import StatBar from '@/components/ui/StatBar.vue';
-import type { GearItem, GearSlot } from '@/types';
+import type { GearItem, GearSlot } from '@/types/types';
 import { computed } from 'vue';
 
 const party = usePartyStore();
